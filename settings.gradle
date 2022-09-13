@@ -12,7 +12,11 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
+plugins {
+    id "com.gradle.enterprise" version "3.10.3"
+    id 'com.gradle.common-custom-user-data-gradle-plugin' version '1.6.3'
+    id 'com.gradle.enterprise.test-distribution'  version '2.3.5'
+}
 include 'clients',
     'connect:api',
     'connect:basic-auth-extension',
@@ -57,3 +61,35 @@ include 'clients',
     'streams:upgrade-system-tests-32',
     'tools',
     'trogdor'
+gradleEnterprise {
+    buildScan {
+        capture {
+            taskInputFiles = true
+        }
+        uploadInBackground = System.getenv("CI") == null
+        // Your personal Gradle Enterprise instance
+        server = 'https://ge.jiewa.tech:31378'
+        publishAlways()
+        // Remove below if you don't use a self-signed or untrusted certificate
+        allowUntrustedServer = true
+        accessKey = 'qr5uw5pn4okyv7fhvcmw6vayrcodpqpyxddzs2vsa5dotcrjicsq'
+    }
+}
+
+buildCache {
+    local {
+        enabled = false
+    }
+    remote(HttpBuildCache) {
+        enabled = true
+        push = System.getenv().containsKey("CI")
+        // Your personal Gradle Enterprise instance's build cache access point
+        url = 'https://ge.jiewa.tech:31378/cache/'
+        credentials {
+            username = System.getenv("GRADLE_CACHE_USERNAME")
+            password = System.getenv("GRADLE_CACHE_PASSWORD")
+        }
+        // Remove below if you don't use a self-signed or untrusted certificate
+        allowUntrustedServer = true
+    }
+}

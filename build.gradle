@@ -446,6 +446,15 @@ subprojects {
       outputs.upToDateWhen { false }
     }
   }
+  tasks.named('test', Test) {
+    useJUnitPlatform()
+    distribution {
+      enabled = true
+      remoteExecutionPreferred = true
+      waitTimeout = Duration.ofMinutes(1)
+      maxRemoteExecutors = 10
+    }
+  }
 
   task integrationTest(type: Test, dependsOn: compileJava) {
     maxParallelForks = maxTestForks
@@ -537,6 +546,7 @@ subprojects {
       maxFailures = userMaxTestRetryFailures
     }
   }
+
 
   // remove test output from all test types
   tasks.withType(Test).all { t ->
